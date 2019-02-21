@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chenxi.dao.EmpMapper">
+    <!-- Emp的resultMap,column是给数据库列起的别名,它对应property类的属性-->
+    <resultMap id="result_Emp_Map" type="com.chenxi.entity.Emp">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="salary" property="salary" />
+        <result column="age" property="age" />
+    </resultMap>
+
+    <!-- 数据库中表名为:t_emp的列名,as前是数据库的列明,as后是列的别名用于映射成实体类中的属性,需要注意的是别名必须与resultMap中的column别名一致 -->
+    <sql id="t_emp_Column">
+        t_emp.id as id
+        ,t_emp.name as name
+        ,t_emp.salary as salary
+        ,t_emp.age as age
+    </sql>
+
+    <!--获得类名为:Emp对应的数据库表的数据总行数 -->
+    <select id="getEmpRowCount" resultType="java.lang.Long">
+        select count(id) from t_emp
+    </select>
+    <!-- 获得类名为:Emp对应数据库中表的数据集合 -->
+    <select id="selectEmp" resultMap="result_Emp_Map">
+        select 
+        <include refid="t_emp_Column" /> 
+        from t_emp
+    </select> 
+
+    <!-- 获得一个Emp对象,以参数Emp对象中不为空的属性作为条件进行查询-->
+    <select id="selectEmpByObj" parameterType="com.chenxi.entity.Emp" resultMap="result_Emp_Map">
+        select 
+            <include refid="t_emp_Column" /> 
+        from t_emp
+        <where>
+            <if test="age != null "> and t_emp.age = #{age}</if>
+            <if test="salary != null "> and t_emp.salary = #{salary}</if>
+            <if test="name != null "> and t_emp.name = #{name}</if>
+            <if test="id != null "> and t_emp.id = #{id}</if>
+        </where>
+    </select> 
+
+    <!-- 通过Emp的id获得对应数据库中表的数据对象-->
+    <select id="selectEmpById" parameterType="java.lang.Integer" resultMap="result_Emp_Map">
+        select 
+            <include refid="t_emp_Column" /> 
+        from t_emp
+        where t_emp.id = #{id}
+    </select> 
+
+    <!-- 将Emp插入到对应数据库的表中,包括属性值为null的数据-->
+
+    <insert id="insertEmp" parameterType="com.chenxi.entity.Emp">
+        insert into t_emp(id,name,salary,age) 
+        values(#{id},#{name},#{salary},#{age})
+    </insert>
+
+    <!-- 将Emp中属性值不为null的数据,插入到对应数据库的表中-->
+    <insert id="insertNonEmptyEmp" parameterType="com.chenxi.entity.Emp">
+        insert into t_emp
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="salary != null">salary,</if>
+            <if test="age != null">age,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null"> #{id},</if>
+            <if test="name != null"> #{name},</if>
+            <if test="salary != null"> #{salary},</if>
+            <if test="age != null"> #{age},</if>
+        </trim>
+    </insert>
+
+    <!-- 通过Emp的id将数据库表中对应的数据删除-->
+    <delete id="deleteEmpById" parameterType="java.lang.Integer">
+        delete from t_emp
+        where id = #{id}
+    </delete>
+
+    <!-- 通过Emp的id将Emp的数据更新到数据库中对应的表,包括值null的数据-->
+    <update id="updateEmpById" parameterType="com.chenxi.entity.Emp">
+        update t_emp set
+            name=#{name}
+            ,salary=#{salary}
+            ,age=#{age}
+        where id=#{id}
+    </update>
+
+    <!-- 通过Emp的id将Emp中属性值不为null的数据更新到数据库对应的表中-->
+    <update id="updateNonEmptyEmpById" parameterType="com.chenxi.entity.Emp">
+        update t_emp
+        <set>
+            <if test="name != null">
+                name=#{name},
+            </if>
+            <if test="salary != null">
+                salary=#{salary},
+            </if>
+            <if test="age != null">
+                age=#{age},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>
